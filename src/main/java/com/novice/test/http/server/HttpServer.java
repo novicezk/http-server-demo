@@ -1,9 +1,9 @@
 package com.novice.test.http.server;
 
-import com.novice.test.http.server.util.InputStreamUtils;
-
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HttpServer {
 
 	public static void main(String[] args) throws IOException {
-		ExecutorService service = Executors.newFixedThreadPool(100);
+		ExecutorService service = Executors.newCachedThreadPool();
 		ServerSocket serverSocket = new ServerSocket(8000);
 		AtomicInteger count = new AtomicInteger(0);
 		while (true) {
@@ -24,10 +24,12 @@ public class HttpServer {
 					int i = count.addAndGet(1);
 					System.out.println("客户端" + i + "连接: ");
 					InputStream in = client.getInputStream();
-					String line = InputStreamUtils.readLine(in);
+
+					BufferedReader br = new BufferedReader(new InputStreamReader(in));
+					String line = br.readLine();
 					while (!line.trim().equals("")) {
 						System.out.println(line);
-						line = InputStreamUtils.readLine(in);
+						line = br.readLine();
 					}
 					Thread.sleep(20L);
 					try (PrintStream out = new PrintStream(client.getOutputStream(), true)) {
