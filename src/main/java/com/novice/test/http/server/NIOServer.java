@@ -56,14 +56,14 @@ public class NIOServer {
 		SocketChannel channel = (SocketChannel) key.channel();
 		int i = COUNT.addAndGet(1);
 		System.out.println("客户端" + i + "连接: ");
+		SocketChannelReader reader = new SocketChannelReader(channel);
+		String line = reader.readLine();
+		while (!line.trim().equals("")) {
+			System.out.println(line);
+			line = reader.readLine();
+		}
 		SERVICE.execute(() -> {
 			try {
-				SocketChannelReader reader = new SocketChannelReader(channel);
-				String line = reader.readLine();
-				while (!line.trim().equals("")) {
-					System.out.println(line);
-					line = reader.readLine();
-				}
 				Thread.sleep(20L);
 				key.attach(new Attachment(i, "Hello World!"));
 				key.interestOps(SelectionKey.OP_WRITE);
